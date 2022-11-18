@@ -1,0 +1,61 @@
+<h3>ねんぴん</h3>
+
+オドメータ：
+<input type="number" @bind="newItem.Odometer" />
+給油量：
+<input type="number" @bind="newItem.OilingQuantity" />
+<button @onclick="AddGasMileage">計算</button>
+
+@if (items == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>オドメーター</th>
+                <th>走行距離</th>
+                <th>給油量</th>
+                <th>燃費</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in items.Reverse<GasMileageItem>())
+            {
+                <tr>
+                    <td>@item.Odometer</td>
+                    <td>@item.Mileage</td>
+                    <td>@item.OilingQuantity</td>
+                    <td>@item.GasMileage</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private List<GasMileageItem> items = new();
+    private GasMileageItem newItem = new();
+
+    private void AddGasMileage()
+    {
+        if (newItem.Odometer > 0)
+        {
+            if (items.Count > 0)
+            {
+                var previousOdo = items[^1].Odometer;
+                newItem.Mileage = newItem.Odometer - previousOdo;
+
+                var mil = Convert.ToDecimal(newItem.Mileage);
+                var oil = Convert.ToDecimal(newItem.OilingQuantity);
+                var gas = decimal.Round(decimal.Divide(mil, oil), 2);
+                newItem.GasMileage = decimal.ToDouble((gas));
+            }
+            items.Add(newItem);
+            newItem = new GasMileageItem();
+        }
+    }
+}
