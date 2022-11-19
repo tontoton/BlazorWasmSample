@@ -6,8 +6,7 @@ public class GasMileageItem
     /// <summary>
     /// オドメータ（総走行距離）
     /// </summary>
-    [Required]
-    public double Odometer { get; set; }
+    public double? Odometer { get; set; }
 
     public string GetOdometerString()
     {
@@ -28,8 +27,7 @@ public class GasMileageItem
     /// <summary>
     /// 給油量
     /// </summary>
-    [Required]
-    public double OilingQuantity { get; set; }
+    public double? OilingQuantity { get; set; }
 
     public string GetOilingQuantityString()
     {

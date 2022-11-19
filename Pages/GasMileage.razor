@@ -32,8 +32,7 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>オドメーター</th>
-                <th>走行距離</th>
+                <th>オドメーター<br/>走行距離</th>
                 <th>給油量</th>
                 <th>燃費</th>
             </tr>
@@ -42,8 +41,7 @@ else
             @foreach (var item in items.Reverse<GasMileageItem>())
             {
                 <tr>
-                    <td style="text-align:right;">@item.GetOdometerString()</td>
-                    <td style="text-align:right;">@item.GetMileageString()</td>
+                    <td style="text-align:right;">@item.GetOdometerString()<br/>@item.GetMileageString()</td>
                     <td style="text-align:right;">@item.GetOilingQuantityString()</td>
                     <td style="text-align:right;">@item.getGasMileageString()</td>
                 </tr>
@@ -71,16 +69,18 @@ else
 
     private void AddGasMileage()
     {
-        if (newItem.Odometer > 0)
+        var newOdometer = newItem.Odometer.GetValueOrDefault();
+        var newOilingQuantity = newItem.OilingQuantity.GetValueOrDefault();
+        if (newOdometer > 0)
         {
             // 丸め処理
-            newItem.Odometer = Math.Round(newItem.Odometer, 1);
-            newItem.OilingQuantity = Math.Round(newItem.OilingQuantity, 2);
+            newItem.Odometer = Math.Round(newOdometer, 1);
+            newItem.OilingQuantity = Math.Round(newOilingQuantity, 2);
             if (items.Count > 0)
             {
                 
-                var previousOdo = items[^1].Odometer;
-                newItem.Mileage = newItem.Odometer - previousOdo;
+                var previousOdo = items[^1].Odometer.Value;
+                newItem.Mileage = newItem.Odometer.Value - previousOdo;
 
                 var mil = Convert.ToDecimal(newItem.Mileage);
                 var oil = Convert.ToDecimal(newItem.OilingQuantity);
