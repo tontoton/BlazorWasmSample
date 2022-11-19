@@ -1,3 +1,5 @@
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@using System.Text.Json
 
 <div class="input-group mb-3">
     <span class="input-group-text">オドメーター</span>
@@ -13,6 +15,7 @@
 </div>
 
 <button @onclick="AddGasMileage" class="btn btn-primary">計算</button>
+<button @onclick="AllClear" class="btn btn-danger">初期化</button>
 <!--
 オドメータ：
 <input type="number" step="0.1" @bind="newItem.Odometer" style="text-align:right" />
@@ -54,6 +57,18 @@ else
     private List<GasMileageItem> items = new();
     private GasMileageItem newItem = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        var count = await localStorage.GetItemAsync<int>("count");
+        for (var i = 0; i < count; i++)
+        {
+            var key = (i + 1).ToString();
+            var serializedString = await localStorage.GetItemAsync<string>(key);
+            var item = System.Text.Json.JsonSerializer.Deserialize<GasMileageItem>(serializedString);
+            items.Add(item);
+        }
+    }
+
     private void AddGasMileage()
     {
         if (newItem.Odometer > 0)
@@ -73,7 +88,20 @@ else
                 newItem.GasMileage = decimal.ToDouble((gas));
             }
             items.Add(newItem);
+
+            var serializedString = System.Text.Json.JsonSerializer.Serialize(newItem);
+            // Console.WriteLine(serializedString);
+
+            localStorage.SetItemAsync("count", items.Count);
+            localStorage.SetItemAsync(items.Count.ToString(), serializedString);
+            
             newItem = new GasMileageItem();
         }
+    }
+
+    private void AllClear()
+    {
+        localStorage.ClearAsync();
+        items.Clear();
     }
 }
