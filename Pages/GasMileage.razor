@@ -1,10 +1,25 @@
 <h3>ねんぴん</h3>
 
+<div class="input-group mb-3">
+    <span class="input-group-text">オドメーター</span>
+    <!--<label for="odo" class="form-label">オドメーター：</label>-->
+    <input id="odo" type="number" @bind="newItem.Odometer" class="form-control" style="text-align:right"/>
+    <span class="input-group-text">km</span>
+</div>
+<div class="input-group mb-3">
+    <span class="input-group-text">給油量</span>
+    <!--<label for="oil" class="form-label">給油量：</label>-->
+    <input id="oil" type="number" step="0.01" @bind="newItem.OilingQuantity" class="form-control" style="text-align:right"/>
+    <span class="input-group-text">L&nbsp;</span>
+</div>
+
+<button @onclick="AddGasMileage" class="btn btn-primary">計算</button>
+<!--
 オドメータ：
-<input type="number" @bind="newItem.Odometer" />
+<input type="number" step="0.1" @bind="newItem.Odometer" style="text-align:right" />
 給油量：
-<input type="number" @bind="newItem.OilingQuantity" />
-<button @onclick="AddGasMileage">計算</button>
+<input type="number" step="0.01" @bind="newItem.OilingQuantity" style="text-align:right"  />
+-->
 
 @if (items == null)
 {
@@ -25,10 +40,10 @@ else
             @foreach (var item in items.Reverse<GasMileageItem>())
             {
                 <tr>
-                    <td>@item.Odometer</td>
-                    <td>@item.Mileage</td>
-                    <td>@item.OilingQuantity</td>
-                    <td>@item.GasMileage</td>
+                    <td style="text-align:right;">@item.GetOdometerString()</td>
+                    <td style="text-align:right;">@item.GetMileageString()</td>
+                    <td style="text-align:right;">@item.GetOilingQuantityString()</td>
+                    <td style="text-align:right;">@item.getGasMileageString()</td>
                 </tr>
             }
         </tbody>
@@ -44,8 +59,12 @@ else
     {
         if (newItem.Odometer > 0)
         {
+            // 丸め処理
+            newItem.Odometer = Math.Round(newItem.Odometer, 1);
+            newItem.OilingQuantity = Math.Round(newItem.OilingQuantity, 2);
             if (items.Count > 0)
             {
+                
                 var previousOdo = items[^1].Odometer;
                 newItem.Mileage = newItem.Odometer - previousOdo;
 
