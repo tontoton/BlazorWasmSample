@@ -2,15 +2,19 @@
 @using System.Text.Json
 
 <div class="input-group mb-3">
+    <span class="input-group-text">給油日</span>
+    <input id="odo" type="date" @bind="_newItem.InDate" class="form-control" />
+</div>
+<div class="input-group mb-3">
     <span class="input-group-text">オドメーター</span>
     <!--<label for="odo" class="form-label">オドメーター：</label>-->
-    <input id="odo" type="number" @bind="newItem.Odometer" class="form-control" style="text-align:right"/>
+    <input id="odo" type="number" @bind="_newItem.Odometer" class="form-control" style="text-align:right"/>
     <span class="input-group-text">km</span>
 </div>
 <div class="input-group mb-3">
     <span class="input-group-text">給油量</span>
     <!--<label for="oil" class="form-label">給油量：</label>-->
-    <input id="oil" type="number" step="0.01" @bind="newItem.OilingQuantity" class="form-control" style="text-align:right"/>
+    <input id="oil" type="number" step="0.01" @bind="_newItem.OilingQuantity" class="form-control" style="text-align:right"/>
     <span class="input-group-text">L&nbsp;</span>
 </div>
 
@@ -18,12 +22,12 @@
 <button @onclick="AllClear" class="btn btn-danger">初期化</button>
 <!--
 オドメータ：
-<input type="number" step="0.1" @bind="newItem.Odometer" style="text-align:right" />
+<input type="number" step="0.1" @bind="_newItem.Odometer" style="text-align:right" />
 給油量：
-<input type="number" step="0.01" @bind="newItem.OilingQuantity" style="text-align:right"  />
+<input type="number" step="0.01" @bind="_newItem.OilingQuantity" style="text-align:right"  />
 -->
 
-@if (items == null)
+@if (_items == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -31,19 +35,21 @@ else
 {
     <table class="table">
         <thead>
-            <tr>
-                <th>オドメーター<br/>走行距離</th>
-                <th>給油量</th>
-                <th>燃費</th>
-            </tr>
+        <tr>
+            <th>給油日</th>
+            <th>オドメーター<br/>走行距離</th>
+            <th>給油量</th>
+            <th>燃費</th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var item in items.Reverse<GasMileageItem>())
+            @foreach (var item in _items.Reverse<GasMileageItem>())
             {
                 <tr>
+                    <td>@item.GetInDate()</td>
                     <td style="text-align:right;">@item.GetOdometerString()<br/>@item.GetMileageString()</td>
                     <td style="text-align:right;">@item.GetOilingQuantityString()</td>
-                    <td style="text-align:right;">@item.getGasMileageString()</td>
+                    <td style="text-align:right;">@item.GetGasMileageString()</td>
                 </tr>
             }
         </tbody>
@@ -52,8 +58,8 @@ else
 
 
 @code {
-    private List<GasMileageItem> items = new();
-    private GasMileageItem newItem = new();
+    private List<GasMileageItem> _items = new();
+    private GasMileageItem _newItem = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,45 +69,45 @@ else
             var key = (i + 1).ToString();
             var serializedString = await localStorage.GetItemAsync<string>(key);
             var item = System.Text.Json.JsonSerializer.Deserialize<GasMileageItem>(serializedString);
-            items.Add(item);
+            _items.Add(item);
         }
     }
 
     private void AddGasMileage()
     {
-        var newOdometer = newItem.Odometer.GetValueOrDefault();
-        var newOilingQuantity = newItem.OilingQuantity.GetValueOrDefault();
+        var newOdometer = _newItem.Odometer.GetValueOrDefault();
+        var newOilingQuantity = _newItem.OilingQuantity.GetValueOrDefault();
         if (newOdometer > 0)
         {
             // 丸め処理
-            newItem.Odometer = Math.Round(newOdometer, 1);
-            newItem.OilingQuantity = Math.Round(newOilingQuantity, 2);
-            if (items.Count > 0)
+            _newItem.Odometer = Math.Round(newOdometer, 1);
+            _newItem.OilingQuantity = Math.Round(newOilingQuantity, 2);
+            if (_items.Count > 0)
             {
                 
-                var previousOdo = items[^1].Odometer.Value;
-                newItem.Mileage = newItem.Odometer.Value - previousOdo;
+                var previousOdo = _items[^1].Odometer.Value;
+                _newItem.Mileage = _newItem.Odometer.Value - previousOdo;
 
-                var mil = Convert.ToDecimal(newItem.Mileage);
-                var oil = Convert.ToDecimal(newItem.OilingQuantity);
+                var mil = Convert.ToDecimal(_newItem.Mileage);
+                var oil = Convert.ToDecimal(_newItem.OilingQuantity);
                 var gas = decimal.Round(decimal.Divide(mil, oil), 2);
-                newItem.GasMileage = decimal.ToDouble((gas));
+                _newItem.GasMileage = decimal.ToDouble((gas));
             }
-            items.Add(newItem);
+            _items.Add(_newItem);
 
-            var serializedString = System.Text.Json.JsonSerializer.Serialize(newItem);
+            var serializedString = System.Text.Json.JsonSerializer.Serialize(_newItem);
             // Console.WriteLine(serializedString);
 
-            localStorage.SetItemAsync("count", items.Count);
-            localStorage.SetItemAsync(items.Count.ToString(), serializedString);
+            localStorage.SetItemAsync("count", _items.Count);
+            localStorage.SetItemAsync(_items.Count.ToString(), serializedString);
             
-            newItem = new GasMileageItem();
+            _newItem = new GasMileageItem();
         }
     }
 
     private void AllClear()
     {
         localStorage.ClearAsync();
-        items.Clear();
+        _items.Clear();
     }
 }

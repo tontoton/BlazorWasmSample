@@ -39,8 +39,16 @@ public class GasMileageItem
     /// </summary>
     public double GasMileage { get; set; }
 
-    public string getGasMileageString()
+    public string GetGasMileageString()
     {
         return $"{GasMileage:n2} km/L";
+    }
+    
+    public DateTime InDate { get; set; } = DateTime.Today;
+
+    public string GetInDate()
+    {
+        // return InDate.ToShortDateString();
+        return InDate.ToString("MM月dd日");
     }
 }
