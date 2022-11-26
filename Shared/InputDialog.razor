@@ -1,0 +1,66 @@
+<div class="modal fade @classShow" tabindex="-1" style="display: @display;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">給油記録入力</h5>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">給油日</span>
+                    <input id="odo" type="date" @bind="_newItem.InDate" class="form-control" />
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">オドメーター</span>
+                    <input id="odo" type="number" @bind="_newItem.Odometer" class="form-control" style="text-align:right"/>
+                    <span class="input-group-text">km</span>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">給油量</span>
+                    <input id="oil" type="number" step="0.01" @bind="_newItem.OilingQuantity" class="form-control" style="text-align:right"/>
+                    <span class="input-group-text">L&nbsp;</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="() => SelectAction(false)">キャンセル</button>
+                <button type="button" class="btn btn-primary" @onclick="() => SelectAction(true)">追加</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade @classShow" style="display: @display;"></div>
+
+@code {
+    
+    [CascadingParameter]
+    protected GasMileageItem? _newItem { get; set; }
+    
+    [Parameter]
+    public EventCallback<bool> ActionSelected { get; set; }
+
+    private string display = "none;";
+
+    private string classShow = "";
+
+    public async Task ShowDialog()
+    {
+        display = "block";
+        await Task.Delay(50);
+        classShow = "show";
+        StateHasChanged();
+    }
+
+    private async Task HideDialog()
+    {
+        classShow = "";
+        await Task.Delay(200);
+        display = "none";
+        StateHasChanged();
+    }
+
+    private async Task SelectAction(bool value)
+    {
+        await HideDialog();
+        await ActionSelected.InvokeAsync(value);
+    }
+}

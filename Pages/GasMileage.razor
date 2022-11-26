@@ -1,31 +1,16 @@
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @using System.Text.Json
 
-<div class="input-group mb-3">
-    <span class="input-group-text">給油日</span>
-    <input id="odo" type="date" @bind="_newItem.InDate" class="form-control" />
-</div>
-<div class="input-group mb-3">
-    <span class="input-group-text">オドメーター</span>
-    <!--<label for="odo" class="form-label">オドメーター：</label>-->
-    <input id="odo" type="number" @bind="_newItem.Odometer" class="form-control" style="text-align:right"/>
-    <span class="input-group-text">km</span>
-</div>
-<div class="input-group mb-3">
-    <span class="input-group-text">給油量</span>
-    <!--<label for="oil" class="form-label">給油量：</label>-->
-    <input id="oil" type="number" step="0.01" @bind="_newItem.OilingQuantity" class="form-control" style="text-align:right"/>
-    <span class="input-group-text">L&nbsp;</span>
+<CascadingValue Value="@_newItem">
+    <InputDialog @ref="confirmation" ActionSelected="ActionSelected" />
+</CascadingValue>
+
+<div class="d-flex justify-content-between">
+        <button @onclick="AllClear" class="btn btn-danger btn-sm">初期化</button>
+        <button type="button" class="btn btn-primary" @onclick="InputDialogShow">追加</button>
 </div>
 
-<button @onclick="AddGasMileage" class="btn btn-primary">計算</button>
-<button @onclick="AllClear" class="btn btn-danger">初期化</button>
-<!--
-オドメータ：
-<input type="number" step="0.1" @bind="_newItem.Odometer" style="text-align:right" />
-給油量：
-<input type="number" step="0.01" @bind="_newItem.OilingQuantity" style="text-align:right"  />
--->
+
 
 @if (_items == null)
 {
@@ -33,16 +18,16 @@
 }
 else
 {
-    <table class="table">
+    <table class="table table-hover">
         <thead>
-        <tr>
+        <tr style="font-size: 12px;">
             <th>給油日</th>
             <th>オドメーター<br/>走行距離</th>
             <th>給油量</th>
             <th>燃費</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody style="font-size: 14px;">
             @foreach (var item in _items.Reverse<GasMileageItem>())
             {
                 <tr>
@@ -58,8 +43,27 @@ else
 
 
 @code {
+    
+    private InputDialog confirmation;
+    
     private List<GasMileageItem> _items = new();
     private GasMileageItem _newItem = new();
+    
+    private void InputDialogShow()
+    {
+        // 最初に初期化するか？
+        _newItem = new GasMileageItem();
+        confirmation.ShowDialog();
+    }
+
+    private void ActionSelected(bool dialogResult)
+    {
+        if (dialogResult)
+        {
+            // 登録処理
+            AddGasMileage();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
